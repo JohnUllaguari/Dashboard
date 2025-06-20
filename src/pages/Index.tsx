@@ -10,14 +10,14 @@ import AdditionalInfo from '../components/AdditionalInfo';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100">
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
         <Header />
         <AlertsSection />
         <LocationSelector />
         <WeatherIndicators />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          <div className="xl:col-span-2">
             <WeatherChart />
           </div>
           <div>
