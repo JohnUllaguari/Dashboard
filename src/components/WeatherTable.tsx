@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -6,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, Filter, Download, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
-const Weather Table = () => {
+const WeatherTable = () => {
   const [filter, setFilter] = useState('all');
 
   const weatherData = [
