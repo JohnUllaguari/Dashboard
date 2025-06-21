@@ -11,27 +11,38 @@ import AdditionalInfo from '../components/AdditionalInfo';
 const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
-        <Header />
-        <AlertsSection />
-        <LocationSelector />
-        <WeatherIndicators />
+      <div className="max-w-7xl mx-auto p-4 sm:p-6">
+        {/* Header section */}
+        <div className="space-y-4 mb-6">
+          <Header />
+          <AlertsSection />
+          <LocationSelector />
+        </div>
         
-        {/* Main content grid - better distribution on laptop screens */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {/* Chart takes more space on larger screens */}
-          <div className="lg:col-span-1 xl:col-span-2">
+        {/* Weather indicators - full width */}
+        <div className="mb-6">
+          <WeatherIndicators />
+        </div>
+        
+        {/* Main content area - responsive grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Left column - Chart (takes 2 columns on large screens) */}
+          <div className="lg:col-span-2 space-y-6">
             <WeatherChart />
+            {/* Weather table goes under chart on large screens, full width on mobile */}
+            <div className="lg:hidden">
+              <WeatherTable />
+            </div>
           </div>
           
-          {/* Additional info in sidebar on larger screens */}
-          <div className="lg:col-span-1 xl:col-span-1">
+          {/* Right column - Additional info */}
+          <div className="lg:col-span-1">
             <AdditionalInfo />
           </div>
         </div>
         
-        {/* Weather table gets its own full-width section */}
-        <div className="w-full">
+        {/* Weather table - only shown on large screens */}
+        <div className="hidden lg:block">
           <WeatherTable />
         </div>
       </div>
