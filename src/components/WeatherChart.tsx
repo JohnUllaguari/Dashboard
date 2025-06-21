@@ -20,12 +20,12 @@ const WeatherChart = () => {
     { time: '21:00', temperatura: 22, humedad: 65, presion: 1009, viento: 8 },
   ];
 
-  const CustomTooltip = ({ active, payload, label }) => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any; label?: string }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white/95 backdrop-blur-sm p-4 rounded-lg border border-gray-200 shadow-lg">
           <p className="font-semibold text-gray-800 mb-2">{`Hora: ${label}`}</p>
-          {payload.map((entry, index) => (
+          {payload.map((entry: any, index: number) => (
             <p key={index} style={{ color: entry.color }} className="text-sm font-medium">
               {`${entry.name}: ${entry.value}${entry.dataKey === 'temperatura' ? '°C' : 
                 entry.dataKey === 'humedad' ? '%' : 
