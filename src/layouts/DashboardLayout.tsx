@@ -1,6 +1,6 @@
-// src/layouts/DashboardLayout.tsx
+
 import React from 'react';
-import Grid from '@mui/material/Unstable_Grid2';     // ← Grid2
+import { Card } from '@/components/ui/card';
 import HeaderUI from '../components/HeaderUI';
 import AlertUI from '../components/AlertUI';
 import SelectorUI from '../components/SelectorUI';
@@ -9,7 +9,6 @@ import ChartUI from '../components/ChartUI';
 import TableUI from '../components/TableUI';
 import AdditionalInfo from '../components/AdditionalInfo';
 import useDataFetcher from '../functions/useDataFetcher';
-import type { OpenMeteoResponse } from '../types/DashboardTypes';
 
 interface DashboardLayoutProps {
   selectedCity: string;
@@ -20,89 +19,93 @@ export default function DashboardLayout({
   selectedCity,
   onCityChange,
 }: DashboardLayoutProps) {
-  const { data, loading, error } = useDataFetcher(selectedCity);
+  // Usar coordenadas por defecto (Berlín) en lugar de ciudad como string
+  const { data, loading, error } = useDataFetcher(52.52, 13.41);
 
   return (
-    <Grid container spacing={3} sx={{ p: 3 }}>
+    <div className="container mx-auto p-4 space-y-6">
       {/* Encabezado */}
-      <Grid xs={12}>
-        <HeaderUI />
-      </Grid>
+      <HeaderUI />
 
       {/* Alertas */}
-      <Grid xs={12} container justifyContent="flex-end">
-        <AlertUI description="No se prevén lluvias" />
-      </Grid>
+      <div className="flex justify-end">
+        <AlertUI description="No se prevén lluvias" type="info" />
+      </div>
 
-      {/* Selector */}
-      <Grid xs={12} md={3}>
-        <SelectorUI selectedCity={selectedCity} onCityChange={onCityChange} />
-      </Grid>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Selector */}
+        <div className="lg:col-span-1">
+          <SelectorUI selectedCity={selectedCity} onCityChange={onCityChange} />
+        </div>
 
-      {/* Indicadores */}
-      <Grid xs={12} md={9} container spacing={2}>
-        {loading && <Grid xs={12}>Cargando datos…</Grid>}
-        {error && (
-          <Grid xs={12} sx={{ color: 'error.main' }}>
-            {error}
-          </Grid>
-        )}
-        {data && (
-          <>
-            <Grid xs={12} md={3}>
+        {/* Indicadores */}
+        <div className="lg:col-span-3">
+          {loading && (
+            <Card className="p-6">
+              <p className="text-center text-gray-600">Cargando datos…</p>
+            </Card>
+          )}
+          
+          {error && (
+            <Card className="p-6 border-red-200 bg-red-50">
+              <p className="text-red-600 text-center">{error}</p>
+            </Card>
+          )}
+          
+          {data && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <IndicatorUI
-                title="Temperatura (2m)"
-                description={`${data.current_weather.temperature} ${data.hourly_units.temperature_2m}`}
+                title="Temperatura"
+                description={`${Math.round(data.current_weather?.temperature || data.hourly.temperature_2m[0])}°C`}
+                color="red"
+                trend="stable"
               />
-            </Grid>
-            <Grid xs={12} md={3}>
               <IndicatorUI
-                title="Viento (10 m)"
-                description={`${data.current_weather.windspeed} ${data.hourly_units.wind_speed_10m}`}
+                title="Viento"
+                description={`${Math.round(data.current_weather?.windspeed || data.hourly.wind_speed_10m[0])} km/h`}
+                color="blue"
+                trend="up"
               />
-            </Grid>
-            <Grid xs={12} md={3}>
               <IndicatorUI
                 title="Humedad"
-                description={`${data.current_weather.relativehumidity_2m} %`}
+                description={`${Math.round(data.hourly.relative_humidity_2m[0])}%`}
+                color="green"
+                trend="down"
               />
-            </Grid>
-            <Grid xs={12} md={3}>
               <IndicatorUI
-                title="Temp Aparente"
-                description={`${data.current_weather.apparent_temperature} °C`}
+                title="Sensación Térmica"
+                description={`${Math.round(data.hourly.apparent_temperature[0])}°C`}
+                color="purple"
+                trend="stable"
               />
-            </Grid>
-          </>
-        )}
-      </Grid>
+            </div>
+          )}
+        </div>
+      </div>
 
-      {/* Gráfico */}
+      {/* Gráfico y Tabla */}
       {data && (
-        <Grid xs={12} md={6} sx={{ display: { xs: 'none', md: 'block' } }}>
-          <ChartUI
-            labels={data.hourly.time}
-            series1={data.hourly.temperature_2m}
-            series2={data.hourly.wind_speed_10m}
-          />
-        </Grid>
-      )}
-
-      {/* Tabla */}
-      {data && (
-        <Grid xs={12} md={6} sx={{ display: { xs: 'none', md: 'block' } }}>
-          <TableUI
-            labels={data.hourly.time}
-            values1={data.hourly.temperature_2m}
-            values2={data.hourly.wind_speed_10m}
-          />
-        </Grid>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="hidden md:block">
+            <ChartUI
+              labels={data.hourly.time}
+              series1={data.hourly.temperature_2m}
+              series2={data.hourly.wind_speed_10m}
+            />
+          </div>
+          
+          <div className="hidden md:block">
+            <TableUI
+              labels={data.hourly.time}
+              values1={data.hourly.temperature_2m}
+              values2={data.hourly.wind_speed_10m}
+            />
+          </div>
+        </div>
       )}
 
       {/* Info extra */}
-      <Grid xs={12}>
-        <AdditionalInfo />
-      </Grid>
-    </Grid>
+      <AdditionalInfo />
+    </div>
   );
 }
