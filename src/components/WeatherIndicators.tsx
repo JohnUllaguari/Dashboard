@@ -1,11 +1,12 @@
-
 import React from 'react';
 import IndicatorUI from './IndicatorUI';
 import useDataFetcher from '../functions/useDataFetcher';
+import { useLocation } from '../contexts/LocationContext';
 import { Thermometer, Droplets, Wind, Eye } from 'lucide-react';
 
 const WeatherIndicators = () => {
-  const { data, loading, error } = useDataFetcher();
+  const { selectedLocation } = useLocation();
+  const { data, loading, error } = useDataFetcher(selectedLocation.latitude, selectedLocation.longitude);
 
   if (loading) {
     return (
@@ -22,7 +23,7 @@ const WeatherIndicators = () => {
   if (error) {
     return (
       <div className="text-center p-6 bg-red-50 rounded-lg border border-red-200">
-        <p className="text-red-600">Error cargando datos: {error}</p>
+        <p className="text-red-600">Error cargando datos de {selectedLocation.label}: {error}</p>
       </div>
     );
   }
@@ -30,7 +31,7 @@ const WeatherIndicators = () => {
   if (!data) {
     return (
       <div className="text-center p-6 bg-gray-50 rounded-lg">
-        <p className="text-gray-600">No hay datos disponibles</p>
+        <p className="text-gray-600">No hay datos disponibles para {selectedLocation.label}</p>
       </div>
     );
   }
@@ -42,38 +43,46 @@ const WeatherIndicators = () => {
   const currentApparent = data.hourly.apparent_temperature[0];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
-      <IndicatorUI
-        title="Temperatura"
-        description={`${Math.round(currentTemp)}°C`}
-        icon={<Thermometer className="w-6 h-6" />}
-        color="red"
-        trend="stable"
-      />
+    <div className="space-y-4">
+      <div className="text-center">
+        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+          Condiciones actuales en {selectedLocation.label}
+        </h3>
+      </div>
       
-      <IndicatorUI
-        title="Humedad"
-        description={`${Math.round(currentHumidity)}%`}
-        icon={<Droplets className="w-6 h-6" />}
-        color="blue"
-        trend="down"
-      />
-      
-      <IndicatorUI
-        title="Viento"
-        description={`${Math.round(currentWind)} km/h`}
-        icon={<Wind className="w-6 h-6" />}
-        color="green"
-        trend="up"
-      />
-      
-      <IndicatorUI
-        title="Sensación Térmica"
-        description={`${Math.round(currentApparent)}°C`}
-        icon={<Eye className="w-6 h-6" />}
-        color="purple"
-        trend="stable"
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
+        <IndicatorUI
+          title="Temperatura"
+          description={`${Math.round(currentTemp)}°C`}
+          icon={<Thermometer className="w-6 h-6" />}
+          color="red"
+          trend="stable"
+        />
+        
+        <IndicatorUI
+          title="Humedad"
+          description={`${Math.round(currentHumidity)}%`}
+          icon={<Droplets className="w-6 h-6" />}
+          color="blue"
+          trend="down"
+        />
+        
+        <IndicatorUI
+          title="Viento"
+          description={`${Math.round(currentWind)} km/h`}
+          icon={<Wind className="w-6 h-6" />}
+          color="green"
+          trend="up"
+        />
+        
+        <IndicatorUI
+          title="Sensación Térmica"
+          description={`${Math.round(currentApparent)}°C`}
+          icon={<Eye className="w-6 h-6" />}
+          color="purple"
+          trend="stable"
+        />
+      </div>
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
@@ -6,10 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, Calendar, BarChart3 } from 'lucide-react';
 import useDataFetcher from '../functions/useDataFetcher';
+import { useLocation } from '../contexts/LocationContext';
 
 const WeatherChart = () => {
   const [viewMode, setViewMode] = useState('line');
-  const { data, loading, error } = useDataFetcher();
+  const { selectedLocation } = useLocation();
+  const { data, loading, error } = useDataFetcher(selectedLocation.latitude, selectedLocation.longitude);
 
   if (loading) {
     return (
@@ -26,7 +27,7 @@ const WeatherChart = () => {
     return (
       <Card className="p-6 bg-gradient-to-br from-white via-blue-50/30 to-white border-0 shadow-xl">
         <div className="text-center p-6">
-          <p className="text-red-600">Error cargando datos del gráfico</p>
+          <p className="text-red-600">Error cargando datos del gráfico para {selectedLocation.label}</p>
         </div>
       </Card>
     );
@@ -67,7 +68,7 @@ const WeatherChart = () => {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
-              Evolución Climática
+              Evolución Climática - {selectedLocation.label}
             </h2>
             <p className="text-gray-600 text-sm">Próximas 24 horas • Datos en tiempo real</p>
           </div>

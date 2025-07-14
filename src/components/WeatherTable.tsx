@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -6,10 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import WeatherTableFilters from './WeatherTableFilters';
 import useDataFetcher from '../functions/useDataFetcher';
+import { useLocation } from '../contexts/LocationContext';
 
 const WeatherTable = () => {
   const [filter, setFilter] = useState('all');
-  const { data, loading, error } = useDataFetcher();
+  const { selectedLocation } = useLocation();
+  const { data, loading, error } = useDataFetcher(selectedLocation.latitude, selectedLocation.longitude);
 
   if (loading) {
     return (
@@ -26,7 +27,7 @@ const WeatherTable = () => {
     return (
       <Card className="p-6 bg-gradient-to-br from-white via-slate-50/30 to-white border-0 shadow-xl">
         <div className="text-center p-6">
-          <p className="text-red-600">Error cargando datos de la tabla</p>
+          <p className="text-red-600">Error cargando datos de la tabla para {selectedLocation.label}</p>
         </div>
       </Card>
     );
@@ -83,7 +84,7 @@ const WeatherTable = () => {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
-              Condiciones Detalladas
+              Condiciones Detalladas - {selectedLocation.label}
             </h2>
             <p className="text-gray-600 text-sm">Pronóstico por horas • Próximas 12 horas</p>
           </div>
