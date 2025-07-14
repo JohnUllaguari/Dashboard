@@ -5,20 +5,41 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, Calendar, BarChart3 } from 'lucide-react';
+import useDataFetcher from '../functions/useDataFetcher';
 
 const WeatherChart = () => {
   const [viewMode, setViewMode] = useState('line');
+  const { data, loading, error } = useDataFetcher();
 
-  const data = [
-    { time: '00:00', temperatura: 18, humedad: 85, presion: 1015, viento: 5 },
-    { time: '03:00', temperatura: 16, humedad: 88, presion: 1016, viento: 4 },
-    { time: '06:00', temperatura: 15, humedad: 90, presion: 1017, viento: 3 },
-    { time: '09:00', temperatura: 20, humedad: 75, presion: 1015, viento: 8 },
-    { time: '12:00', temperatura: 24, humedad: 60, presion: 1013, viento: 12 },
-    { time: '15:00', temperatura: 26, humedad: 55, presion: 1012, viento: 15 },
-    { time: '18:00', temperatura: 25, humedad: 58, presion: 1010, viento: 10 },
-    { time: '21:00', temperatura: 22, humedad: 65, presion: 1009, viento: 8 },
-  ];
+  if (loading) {
+    return (
+      <Card className="p-6 bg-gradient-to-br from-white via-blue-50/30 to-white border-0 shadow-xl">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded mb-4"></div>
+          <div className="h-96 bg-gray-200 rounded"></div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <Card className="p-6 bg-gradient-to-br from-white via-blue-50/30 to-white border-0 shadow-xl">
+        <div className="text-center p-6">
+          <p className="text-red-600">Error cargando datos del gráfico</p>
+        </div>
+      </Card>
+    );
+  }
+
+  // Procesar datos para las primeras 24 horas
+  const chartData = data.hourly.time.slice(0, 24).map((time, index) => ({
+    time: new Date(time).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+    temperatura: Math.round(data.hourly.temperature_2m[index]),
+    humedad: Math.round(data.hourly.relative_humidity_2m[index]),
+    viento: Math.round(data.hourly.wind_speed_10m[index]),
+    sensacion: Math.round(data.hourly.apparent_temperature[index])
+  }));
 
   const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any; label?: string }) => {
     if (active && payload && payload.length) {
@@ -27,9 +48,8 @@ const WeatherChart = () => {
           <p className="font-semibold text-gray-800 mb-2">{`Hora: ${label}`}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} style={{ color: entry.color }} className="text-sm font-medium">
-              {`${entry.name}: ${entry.value}${entry.dataKey === 'temperatura' ? '°C' : 
-                entry.dataKey === 'humedad' ? '%' : 
-                entry.dataKey === 'presion' ? ' hPa' : ' km/h'}`}
+              {`${entry.name}: ${entry.value}${entry.dataKey === 'temperatura' || entry.dataKey === 'sensacion' ? '°C' : 
+                entry.dataKey === 'humedad' ? '%' : ' km/h'}`}
             </p>
           ))}
         </div>
@@ -49,7 +69,7 @@ const WeatherChart = () => {
             <h2 className="text-2xl font-bold text-gray-800">
               Evolución Climática
             </h2>
-            <p className="text-gray-600 text-sm">Últimas 24 horas • Actualizado en tiempo real</p>
+            <p className="text-gray-600 text-sm">Próximas 24 horas • Datos en tiempo real</p>
           </div>
         </div>
         
@@ -81,7 +101,7 @@ const WeatherChart = () => {
       <div className="h-96 mb-4">
         <ResponsiveContainer width="100%" height="100%">
           {viewMode === 'line' ? (
-            <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" opacity={0.7} />
               <XAxis 
                 dataKey="time" 
@@ -124,7 +144,7 @@ const WeatherChart = () => {
               />
             </LineChart>
           ) : (
-            <AreaChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" opacity={0.7} />
               <XAxis 
                 dataKey="time" 

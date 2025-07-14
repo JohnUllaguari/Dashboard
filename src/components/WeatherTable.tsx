@@ -1,92 +1,63 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Calendar, Filter, Download, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Calendar, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import WeatherTableFilters from './WeatherTableFilters';
+import useDataFetcher from '../functions/useDataFetcher';
 
 const WeatherTable = () => {
   const [filter, setFilter] = useState('all');
+  const { data, loading, error } = useDataFetcher();
 
-  const weatherData = [
-    {
-      hora: '09:00',
-      temperatura: '20°C',
-      condicion: 'Parcialmente nublado',
-      precipitacion: '10%',
-      viento: '8 km/h',
-      presion: '1015 hPa',
-      uv: '3',
-      estado: 'normal',
-      tendencia: 'up'
-    },
-    {
-      hora: '12:00',
-      temperatura: '24°C',
-      condicion: 'Soleado',
-      precipitacion: '0%',
-      viento: '12 km/h',
-      presion: '1013 hPa',
-      uv: '7',
-      estado: 'bueno',
-      tendencia: 'up'
-    },
-    {
-      hora: '15:00',
-      temperatura: '26°C',
-      condicion: 'Soleado',
-      precipitacion: '5%',
-      viento: '15 km/h',
-      presion: '1012 hPa',
-      uv: '8',
-      estado: 'bueno',
-      tendencia: 'stable'
-    },
-    {
-      hora: '18:00',
-      temperatura: '25°C',
-      condicion: 'Parcialmente nublado',
-      precipitacion: '20%',
-      viento: '10 km/h',
-      presion: '1010 hPa',
-      uv: '4',
-      estado: 'normal',
-      tendencia: 'down'
-    },
-    {
-      hora: '21:00',
-      temperatura: '22°C',
-      condicion: 'Nublado',
-      precipitacion: '35%',
-      viento: '8 km/h',
-      presion: '1009 hPa',
-      uv: '1',
-      estado: 'precaucion',
-      tendencia: 'down'
-    },
-    {
-      hora: '00:00',
-      temperatura: '18°C',
-      condicion: 'Nublado',
-      precipitacion: '45%',
-      viento: '5 km/h',
-      presion: '1008 hPa',
-      uv: '0',
-      estado: 'precaucion',
-      tendencia: 'down'
-    }
-  ];
+  if (loading) {
+    return (
+      <Card className="p-6 bg-gradient-to-br from-white via-slate-50/30 to-white border-0 shadow-xl">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded mb-4"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
+      </Card>
+    );
+  }
 
-  const getEstadoBadge = (estado: string) => {
-    switch (estado) {
-      case 'bueno':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200">Óptimo</Badge>;
-      case 'normal':
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100 border-blue-200">Normal</Badge>;
-      case 'precaucion':
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-yellow-200">Precaución</Badge>;
-      default:
-        return <Badge variant="secondary">-</Badge>;
+  if (error || !data) {
+    return (
+      <Card className="p-6 bg-gradient-to-br from-white via-slate-50/30 to-white border-0 shadow-xl">
+        <div className="text-center p-6">
+          <p className="text-red-600">Error cargando datos de la tabla</p>
+        </div>
+      </Card>
+    );
+  }
+
+  // Procesar datos para la tabla (primeras 12 horas)
+  const weatherData = data.hourly.time.slice(0, 12).map((time, index) => {
+    const hour = new Date(time).getHours();
+    const timeString = new Date(time).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    
+    return {
+      hora: timeString,
+      temperatura: `${Math.round(data.hourly.temperature_2m[index])}°C`,
+      humedad: `${Math.round(data.hourly.relative_humidity_2m[index])}%`,
+      viento: `${Math.round(data.hourly.wind_speed_10m[index])} km/h`,
+      sensacion: `${Math.round(data.hourly.apparent_temperature[index])}°C`,
+      periodo: hour >= 6 && hour < 12 ? 'morning' : hour >= 12 && hour < 18 ? 'afternoon' : 'night',
+      temp_value: data.hourly.temperature_2m[index],
+      tendencia: index > 0 ? 
+        (data.hourly.temperature_2m[index] > data.hourly.temperature_2m[index - 1] ? 'up' : 
+         data.hourly.temperature_2m[index] < data.hourly.temperature_2m[index - 1] ? 'down' : 'stable') : 'stable'
+    };
+  });
+
+  const getEstadoBadge = (temp: number) => {
+    if (temp > 25) {
+      return <Badge className="bg-red-100 text-red-800 hover:bg-red-100 border-red-200">Calor</Badge>;
+    } else if (temp > 15) {
+      return <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200">Óptimo</Badge>;
+    } else {
+      return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100 border-blue-200">Fresco</Badge>;
     }
   };
 
@@ -101,14 +72,7 @@ const WeatherTable = () => {
     }
   };
 
-  const getCondicionColor = (condicion: string) => {
-    if (condicion.includes('Soleado')) return 'text-yellow-600 font-medium';
-    if (condicion.includes('Nublado')) return 'text-gray-600 font-medium';
-    if (condicion.includes('Parcialmente')) return 'text-blue-600 font-medium';
-    return 'text-gray-700';
-  };
-
-  const filteredData = filter === 'all' ? weatherData : weatherData.filter(row => row.estado === filter);
+  const filteredData = filter === 'all' ? weatherData : weatherData.filter(row => row.periodo === filter);
 
   return (
     <Card className="p-6 bg-gradient-to-br from-white via-slate-50/30 to-white border-0 shadow-xl">
@@ -121,43 +85,16 @@ const WeatherTable = () => {
             <h2 className="text-2xl font-bold text-gray-800">
               Condiciones Detalladas
             </h2>
-            <p className="text-gray-600 text-sm">Pronóstico por horas • Próximas 24 horas</p>
+            <p className="text-gray-600 text-sm">Pronóstico por horas • Próximas 12 horas</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
-          <div className="flex bg-gray-100 rounded-lg p-1">
-            <Button
-              variant={filter === 'all' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setFilter('all')}
-              className="h-8 text-xs"
-            >
-              <Filter className="w-3 h-3 mr-1" />
-              Todos
-            </Button>
-            <Button
-              variant={filter === 'bueno' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setFilter('bueno')}
-              className="h-8 text-xs"
-            >
-              Óptimo
-            </Button>
-            <Button
-              variant={filter === 'precaucion' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setFilter('precaucion')}
-              className="h-8 text-xs"
-            >
-              Precaución
-            </Button>
-          </div>
-          <Button variant="outline" size="sm" className="h-8">
-            <Download className="w-4 h-4 mr-1" />
-            Exportar
-          </Button>
-        </div>
+        <WeatherTableFilters 
+          filter={filter}
+          setFilter={setFilter}
+          totalRows={weatherData.length}
+          filteredRows={filteredData.length}
+        />
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-gray-200">
@@ -166,11 +103,9 @@ const WeatherTable = () => {
             <TableRow className="hover:bg-gray-50/80">
               <TableHead className="font-bold text-gray-700 h-12">Hora</TableHead>
               <TableHead className="font-bold text-gray-700">Temperatura</TableHead>
-              <TableHead className="font-bold text-gray-700">Condición</TableHead>
-              <TableHead className="font-bold text-gray-700">Precipitación</TableHead>
+              <TableHead className="font-bold text-gray-700">Humedad</TableHead>
               <TableHead className="font-bold text-gray-700">Viento</TableHead>
-              <TableHead className="font-bold text-gray-700">Presión</TableHead>
-              <TableHead className="font-bold text-gray-700">Índice UV</TableHead>
+              <TableHead className="font-bold text-gray-700">Sensación</TableHead>
               <TableHead className="font-bold text-gray-700">Estado</TableHead>
               <TableHead className="font-bold text-gray-700 text-center">Tendencia</TableHead>
             </TableRow>
@@ -187,28 +122,16 @@ const WeatherTable = () => {
                 <TableCell className="font-bold text-red-600">
                   {row.temperatura}
                 </TableCell>
-                <TableCell className={getCondicionColor(row.condicion)}>
-                  {row.condicion}
-                </TableCell>
                 <TableCell className="font-medium text-blue-600">
-                  {row.precipitacion}
+                  {row.humedad}
                 </TableCell>
                 <TableCell className="font-medium text-green-600">
                   {row.viento}
                 </TableCell>
-                <TableCell className="font-medium text-gray-700">
-                  {row.presion}
+                <TableCell className="font-medium text-purple-600">
+                  {row.sensacion}
                 </TableCell>
-                <TableCell className="font-medium">
-                  <Badge 
-                    className={`${parseInt(row.uv) > 6 ? 'bg-orange-100 text-orange-800' : 
-                      parseInt(row.uv) > 3 ? 'bg-yellow-100 text-yellow-800' : 
-                      'bg-gray-100 text-gray-800'}`}
-                  >
-                    {row.uv}
-                  </Badge>
-                </TableCell>
-                <TableCell>{getEstadoBadge(row.estado)}</TableCell>
+                <TableCell>{getEstadoBadge(row.temp_value)}</TableCell>
                 <TableCell className="text-center">
                   {getTendenciaIcon(row.tendencia)}
                 </TableCell>
@@ -220,7 +143,7 @@ const WeatherTable = () => {
 
       <div className="mt-4 flex items-center justify-between text-sm text-gray-600 bg-gray-50/50 p-3 rounded-lg">
         <span>Mostrando {filteredData.length} de {weatherData.length} registros</span>
-        <span>Última actualización: hace 5 minutos</span>
+        <span>Última actualización: {new Date().toLocaleTimeString('es-ES')}</span>
       </div>
     </Card>
   );

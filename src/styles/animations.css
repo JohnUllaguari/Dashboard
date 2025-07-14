@@ -1,0 +1,355 @@
+
+/* Weather-themed animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateX(-20px) translateY(0px);
+  }
+  50% {
+    transform: translateX(20px) translateY(-15px);
+  }
+}
+
+@keyframes float-delayed {
+  0%, 100% {
+    transform: translateX(10px) translateY(0px);
+  }
+  50% {
+    transform: translateX(-15px) translateY(-20px);
+  }
+}
+
+@keyframes float-reverse {
+  0%, 100% {
+    transform: translateX(0px) translateY(-10px);
+  }
+  50% {
+    transform: translateX(-25px) translateY(5px);
+  }
+}
+
+@keyframes rain-drop {
+  0% {
+    transform: translateY(-100vh);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+@keyframes rain-drop-delayed {
+  0% {
+    transform: translateY(-100vh);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+@keyframes rain-drop-slow {
+  0% {
+    transform: translateY(-100vh);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+@keyframes lightning {
+  0%, 90%, 100% {
+    opacity: 0;
+  }
+  5%, 15% {
+    opacity: 1;
+  }
+}
+
+@keyframes snow-fall {
+  0% {
+    transform: translateY(-100vh) translateX(0px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) translateX(100px);
+    opacity: 0;
+  }
+}
+
+@keyframes snow-fall-delayed {
+  0% {
+    transform: translateY(-100vh) translateX(0px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) translateX(-80px);
+    opacity: 0;
+  }
+}
+
+@keyframes snow-fall-slow {
+  0% {
+    transform: translateY(-100vh) translateX(0px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) translateX(60px);
+    opacity: 0;
+  }
+}
+
+@keyframes sun-rays {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.2);
+    opacity: 0.6;
+  }
+}
+
+@keyframes sun-rays-reverse {
+  0%, 100% {
+    transform: rotate(360deg) scale(1.1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: rotate(180deg) scale(0.9);
+    opacity: 0.4;
+  }
+}
+
+@keyframes wind-flow {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes wind-flow-delayed {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes wind-flow-reverse {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes spin-very-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.5), 0 0 60px rgba(59, 130, 246, 0.2);
+  }
+}
+
+/* Animation classes */
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 10s ease-in-out infinite 2s;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 7s ease-in-out infinite 1s;
+}
+
+.animate-rain-drop {
+  animation: rain-drop 3s linear infinite;
+}
+
+.animate-rain-drop-delayed {
+  animation: rain-drop-delayed 4s linear infinite 1s;
+}
+
+.animate-rain-drop-slow {
+  animation: rain-drop-slow 5s linear infinite 2s;
+}
+
+.animate-lightning {
+  animation: lightning 4s infinite 3s;
+}
+
+.animate-snow-fall {
+  animation: snow-fall 8s linear infinite;
+}
+
+.animate-snow-fall-delayed {
+  animation: snow-fall-delayed 10s linear infinite 2s;
+}
+
+.animate-snow-fall-slow {
+  animation: snow-fall-slow 12s linear infinite 4s;
+}
+
+.animate-sun-rays {
+  animation: sun-rays 6s ease-in-out infinite;
+}
+
+.animate-sun-rays-reverse {
+  animation: sun-rays-reverse 8s ease-in-out infinite 1s;
+}
+
+.animate-wind-flow {
+  animation: wind-flow 6s ease-in-out infinite;
+}
+
+.animate-wind-flow-delayed {
+  animation: wind-flow-delayed 8s ease-in-out infinite 2s;
+}
+
+.animate-wind-flow-reverse {
+  animation: wind-flow-reverse 7s ease-in-out infinite 1s;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+.animate-spin-very-slow {
+  animation: spin-very-slow 30s linear infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Delay classes */
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-300 {
+  animation-delay: 0.3s;
+}
+
+.delay-400 {
+  animation-delay: 0.4s;
+}
+
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+.delay-700 {
+  animation-delay: 0.7s;
+}
+
+.delay-1000 {
+  animation-delay: 1s;
+}
+
+/* Gradient utilities */
+.bg-gradient-radial {
+  background: radial-gradient(circle, var(--tw-gradient-stops));
+}
+
+.bg-gradient-conic {
+  background: conic-gradient(var(--tw-gradient-stops));
+}
+
+.shadow-3xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
