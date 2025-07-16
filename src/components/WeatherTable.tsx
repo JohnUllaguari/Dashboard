@@ -4,13 +4,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Calendar, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import WeatherTableFilters from './WeatherTableFilters';
-import useDataFetcher from '../functions/useDataFetcher';
+import { useWeatherData } from '../hooks/useWeatherData';
 import { useLocation } from '../contexts/LocationContext';
 
 const WeatherTable = () => {
   const [filter, setFilter] = useState('all');
   const { selectedLocation } = useLocation();
-  const { data, loading, error } = useDataFetcher(selectedLocation.latitude, selectedLocation.longitude);
+  const { data, loading, error, isFromCache, cacheAge, refresh } = useWeatherData(
+    selectedLocation.latitude, 
+    selectedLocation.longitude
+  );
 
   if (loading) {
     return (
@@ -86,7 +89,25 @@ const WeatherTable = () => {
             <h2 className="text-2xl font-bold text-gray-800">
               Condiciones Detalladas - {selectedLocation.label}
             </h2>
-            <p className="text-gray-600 text-sm">Pronóstico por horas • Próximas 12 horas</p>
+            <div className="flex items-center gap-4 text-sm">
+              <p className="text-gray-600">Pronóstico por horas • Próximas 12 horas</p>
+              {isFromCache && (
+                <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
+                  Cache ({cacheAge}s)
+                </span>
+              )}
+              {error && (
+                <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">
+                  Offline
+                </span>
+              )}
+              <button 
+                onClick={refresh}
+                className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs hover:bg-blue-200 transition-colors"
+              >
+                Actualizar
+              </button>
+            </div>
           </div>
         </div>
         
