@@ -14,31 +14,75 @@ import {
   Activity,
   Sun
 } from 'lucide-react';
+import { useLocation } from '../contexts/LocationContext';
+import useDataFetcher from '../functions/useDataFetcher';
 
 const AdditionalInfo = () => {
-  const tips = [
-    {
-      icon: <Umbrella className="w-4 h-4 text-blue-500" />,
-      title: 'Probabilidad de lluvia',
-      description: 'No olvides llevar paraguas por la tarde.',
-      priority: 'media',
-      action: 'Preparar paraguas'
-    },
-    {
-      icon: <Shirt className="w-4 h-4 text-green-500" />,
-      title: 'Vestimenta',
-      description: 'Ropa ligera y cómoda para el día.',
-      priority: 'baja',
-      action: 'Vestirse apropiadamente'
-    },
-    {
-      icon: <Sun className="w-4 h-4 text-yellow-500" />,
-      title: 'Protección solar',
-      description: 'Índice UV alto entre 12:00-16:00.',
-      priority: 'alta',
-      action: 'Aplicar protector'
+  const { selectedLocation } = useLocation();
+  const { data } = useDataFetcher(selectedLocation.latitude, selectedLocation.longitude);
+
+  // Generar consejos dinámicos basados en datos reales
+  const generateTips = () => {
+    if (!data) return [];
+    
+    const tips = [];
+    const currentTemp = data.current_weather?.temperature || data.hourly.temperature_2m[0];
+    const currentHumidity = data.hourly.relative_humidity_2m[0];
+    const currentWind = data.current_weather?.windspeed || data.hourly.wind_speed_10m[0];
+    
+    // Consejo de vestimenta basado en temperatura
+    if (currentTemp > 25) {
+      tips.push({
+        icon: <Shirt className="w-4 h-4 text-orange-500" />,
+        title: 'Vestimenta',
+        description: 'Ropa ligera y transpirable. Colores claros preferibles.',
+        priority: 'media',
+        action: 'Vestirse fresco'
+      });
+    } else if (currentTemp < 15) {
+      tips.push({
+        icon: <Shirt className="w-4 h-4 text-blue-500" />,
+        title: 'Vestimenta',
+        description: 'Ropa de abrigo recomendada. Capas múltiples.',
+        priority: 'alta',
+        action: 'Vestirse abrigado'
+      });
+    } else {
+      tips.push({
+        icon: <Shirt className="w-4 h-4 text-green-500" />,
+        title: 'Vestimenta',
+        description: 'Ropa cómoda y ligera para el día.',
+        priority: 'baja',
+        action: 'Vestirse cómodo'
+      });
     }
-  ];
+    
+    // Consejo de protección solar
+    if (currentTemp > 20) {
+      tips.push({
+        icon: <Sun className="w-4 h-4 text-yellow-500" />,
+        title: 'Protección solar',
+        description: `Con ${Math.round(currentTemp)}°C, usa protector solar factor 30+.`,
+        priority: 'alta',
+        action: 'Aplicar protector'
+      });
+    }
+    
+    // Consejo de humedad
+    if (currentHumidity > 70) {
+      tips.push({
+        icon: <Umbrella className="w-4 h-4 text-blue-500" />,
+        title: 'Humedad alta',
+        description: `Humedad del ${Math.round(currentHumidity)}%. Mantente hidratado.`,
+        priority: 'media',
+        action: 'Beber agua'
+      });
+    }
+    
+    return tips;
+  };
+
+  const tips = generateTips();
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -51,37 +95,107 @@ const AdditionalInfo = () => {
     }
   };
 
-  const astronomicalData = [
-    {
-      icon: <Sunrise className="w-4 h-4 text-orange-500" />,
-      label: 'Salida del sol',
-      value: '07:32',
-      detail: 'En 2h 15min'
-    },
-    {
-      icon: <Sunset className="w-4 h-4 text-orange-600" />,
-      label: 'Puesta del sol',
-      value: '20:45',
-      detail: 'En 15h 28min'
-    },
-    {
-      icon: <Moon className="w-4 h-4 text-blue-400" />,
-      label: 'Fase lunar',
-      value: 'Cuarto creciente',
-      detail: '67% iluminada'
-    }
-  ];
-
-  const airQuality = {
-    index: 42,
-    level: 'Buena',
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    components: [
-      { name: 'PM2.5', value: '12 μg/m³', status: 'Bueno' },
-      { name: 'O₃', value: '85 μg/m³', status: 'Moderado' }
-    ]
+  // Generar datos astronómicos dinámicos basados en ubicación
+  const generateAstronomicalData = () => {
+    const now = new Date();
+    const sunrise = new Date();
+    const sunset = new Date();
+    
+    // Calcular aproximadamente basado en latitud (simplificado)
+    const lat = selectedLocation.latitude;
+    const seasonOffset = Math.sin((now.getMonth() - 2) * Math.PI / 6) * 2; // Aproximación estacional
+    
+    sunrise.setHours(7 + seasonOffset - lat * 0.02, 30, 0, 0);
+    sunset.setHours(19 - seasonOffset - lat * 0.02, 45, 0, 0);
+    
+    const timeToSunrise = sunrise.getTime() - now.getTime();
+    const timeToSunset = sunset.getTime() - now.getTime();
+    
+    const formatTimeLeft = (ms) => {
+      const hours = Math.floor(Math.abs(ms) / (1000 * 60 * 60));
+      const minutes = Math.floor((Math.abs(ms) % (1000 * 60 * 60)) / (1000 * 60));
+      return ms > 0 ? `En ${hours}h ${minutes}min` : `Hace ${hours}h ${minutes}min`;
+    };
+    
+    return [
+      {
+        icon: <Sunrise className="w-4 h-4 text-orange-500" />,
+        label: 'Salida del sol',
+        value: sunrise.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+        detail: formatTimeLeft(timeToSunrise)
+      },
+      {
+        icon: <Sunset className="w-4 h-4 text-orange-600" />,
+        label: 'Puesta del sol',
+        value: sunset.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+        detail: formatTimeLeft(timeToSunset)
+      },
+      {
+        icon: <Moon className="w-4 h-4 text-blue-400" />,
+        label: 'Fase lunar',
+        value: 'Cuarto creciente',
+        detail: '67% iluminada'
+      }
+    ];
   };
+
+  const astronomicalData = generateAstronomicalData();
+
+  // Generar calidad del aire dinámicamente basada en ubicación
+  const generateAirQuality = () => {
+    if (!data) {
+      return {
+        index: 42,
+        level: 'Buena',
+        color: 'text-green-600',
+        bgColor: 'bg-green-50',
+        components: [
+          { name: 'PM2.5', value: '12 μg/m³', status: 'Bueno' },
+          { name: 'O₃', value: '85 μg/m³', status: 'Moderado' }
+        ]
+      };
+    }
+    
+    const humidity = data.hourly.relative_humidity_2m[0];
+    const wind = data.current_weather?.windspeed || data.hourly.wind_speed_10m[0];
+    
+    // Simulación basada en condiciones climáticas
+    let index = 50;
+    let level = 'Moderada';
+    let color = 'text-yellow-600';
+    let bgColor = 'bg-yellow-50';
+    
+    if (wind > 15) { // Viento ayuda a limpiar el aire
+      index -= 10;
+    }
+    
+    if (humidity > 80) { // Humedad alta puede empeorar calidad
+      index += 5;
+    }
+    
+    if (index < 50) {
+      level = 'Buena';
+      color = 'text-green-600';
+      bgColor = 'bg-green-50';
+    } else if (index > 100) {
+      level = 'Mala';
+      color = 'text-red-600';
+      bgColor = 'bg-red-50';
+    }
+    
+    return {
+      index: Math.round(index),
+      level,
+      color,
+      bgColor,
+      components: [
+        { name: 'PM2.5', value: `${Math.round(index * 0.3)} μg/m³`, status: level },
+        { name: 'O₃', value: `${Math.round(index * 2)} μg/m³`, status: level }
+      ]
+    };
+  };
+
+  const airQuality = generateAirQuality();
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

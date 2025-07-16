@@ -58,41 +58,45 @@ const Index = () => {
           {/* Header section with enhanced styling */}
           <div className="space-y-6 mb-8 animate-fade-in">
             <Header />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20 shadow-2xl">
-                <AlertsSection />
-              </div>
-              <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20 shadow-2xl">
-                <LocationSelector />
-              </div>
+            
+            {/* Ubicación actual - justo debajo del header */}
+            <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20 shadow-2xl">
+              <LocationSelector />
             </div>
           </div>
           
-          {/* Weather indicators with enhanced card design */}
+          {/* Condiciones actuales - LO MÁS IMPORTANTE */}
           <div className="mb-8 animate-fade-in delay-100">
             <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20 shadow-2xl p-6">
               <WeatherIndicators />
             </div>
           </div>
           
-          {/* Main chart section with improved styling */}
+          {/* Gráfico con evolución climática - SEGUNDO MÁS IMPORTANTE */}
           <div className="mb-8 animate-fade-in delay-200">
             <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20 shadow-2xl p-6">
               <WeatherChart />
             </div>
           </div>
-
-          {/* Enhanced grid layout for info cards */}
+          
+          {/* Condiciones detalladas - TERCERO MÁS IMPORTANTE */}
           <div className="mb-8 animate-fade-in delay-300">
             <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20 shadow-2xl p-6">
-              <AdditionalInfo />
+              <WeatherTable />
+            </div>
+          </div>
+
+          {/* Alertas meteorológicas - DATOS MENOS RELEVANTES */}
+          <div className="mb-8 animate-fade-in delay-400">
+            <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20 shadow-2xl">
+              <AlertsSection />
             </div>
           </div>
           
-          {/* Weather table with enhanced styling */}
-          <div className="animate-fade-in delay-400">
+          {/* Información adicional (consejos, astronómicos, calidad aire) - AL FINAL */}
+          <div className="animate-fade-in delay-500">
             <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20 shadow-2xl p-6">
-              <WeatherTable />
+              <AdditionalInfo />
             </div>
           </div>
         </div>

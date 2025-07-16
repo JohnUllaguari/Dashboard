@@ -3,37 +3,88 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Info, CheckCircle, Clock, MapPin } from 'lucide-react';
+import { useLocation } from '../contexts/LocationContext';
+import useDataFetcher from '../functions/useDataFetcher';
 
 const AlertsSection = () => {
-  const alerts = [
-    {
-      id: 1,
-      type: 'warning',
-      title: 'Alerta de Tormenta Eléctrica',
-      message: 'Se esperan tormentas eléctricas intensas con vientos de hasta 80 km/h en las próximas 2 horas. Evite actividades al aire libre.',
-      time: 'Hace 15 min',
-      location: 'Madrid Centro',
-      severity: 'Alta'
-    },
-    {
-      id: 2,
-      type: 'info',
-      title: 'Descenso de Temperatura',
-      message: 'Descenso significativo de temperatura previsto para esta noche (hasta 8°C). Se recomienda abrigo adicional.',
-      time: 'Hace 1 hora',
-      location: 'Toda la región',
-      severity: 'Media'
-    },
-    {
-      id: 3,
-      type: 'success',
-      title: 'Condiciones Favorables',
-      message: 'Excelentes condiciones climáticas para actividades deportivas al aire libre durante la mañana.',
-      time: 'Hace 2 horas',
-      location: 'Zona Norte',
-      severity: 'Baja'
+  const { selectedLocation } = useLocation();
+  const { data } = useDataFetcher(selectedLocation.latitude, selectedLocation.longitude);
+
+  // Generar alertas dinámicas basadas en datos reales
+  const generateAlerts = () => {
+    if (!data) return [];
+    
+    const alerts = [];
+    const currentTemp = data.current_weather?.temperature || data.hourly.temperature_2m[0];
+    const currentWind = data.current_weather?.windspeed || data.hourly.wind_speed_10m[0];
+    const currentHumidity = data.hourly.relative_humidity_2m[0];
+    
+    // Alerta por temperatura extrema
+    if (currentTemp > 30) {
+      alerts.push({
+        id: 1,
+        type: 'warning',
+        title: 'Temperatura Alta',
+        message: `Temperatura de ${Math.round(currentTemp)}°C registrada. Se recomienda hidratarse frecuentemente y evitar exposición prolongada al sol.`,
+        time: 'Ahora',
+        location: selectedLocation.label,
+        severity: 'Alta'
+      });
+    } else if (currentTemp < 5) {
+      alerts.push({
+        id: 1,
+        type: 'warning',
+        title: 'Temperatura Baja',
+        message: `Temperatura de ${Math.round(currentTemp)}°C registrada. Use ropa de abrigo y evite exposición prolongada al frío.`,
+        time: 'Ahora',
+        location: selectedLocation.label,
+        severity: 'Alta'
+      });
     }
-  ];
+    
+    // Alerta por viento fuerte
+    if (currentWind > 25) {
+      alerts.push({
+        id: 2,
+        type: 'warning',
+        title: 'Vientos Fuertes',
+        message: `Vientos de ${Math.round(currentWind)} km/h registrados. Precaución al conducir y evite actividades al aire libre.`,
+        time: 'Hace 5 min',
+        location: selectedLocation.label,
+        severity: 'Media'
+      });
+    }
+    
+    // Alerta por humedad alta
+    if (currentHumidity > 80) {
+      alerts.push({
+        id: 3,
+        type: 'info',
+        title: 'Humedad Alta',
+        message: `Humedad del ${Math.round(currentHumidity)}% registrada. Sensación térmica puede ser mayor que la temperatura real.`,
+        time: 'Hace 10 min',
+        location: selectedLocation.label,
+        severity: 'Baja'
+      });
+    }
+    
+    // Si no hay alertas, mostrar condiciones favorables
+    if (alerts.length === 0) {
+      alerts.push({
+        id: 4,
+        type: 'success',
+        title: 'Condiciones Favorables',
+        message: `Condiciones climáticas óptimas en ${selectedLocation.label}. Ideal para actividades al aire libre.`,
+        time: 'Ahora',
+        location: selectedLocation.label,
+        severity: 'Baja'
+      });
+    }
+    
+    return alerts;
+  };
+
+  const alerts = generateAlerts();
 
   const getAlertIcon = (type: string) => {
     switch (type) {
