@@ -1,46 +1,59 @@
 // src/functions/DataFetcher.tsx
-import { useEffect, useState } from 'react';
-import type { OpenMeteoResponse } from '../types/DashboardTypes';
 
-export interface DataFetcherOutput {
-  data: OpenMeteoResponse | null;
-  loading: boolean;
-  error: string | null;
+export interface CacheEntry<T> {
+  timestamp: number;
+  data: T;
 }
 
-export default function DataFetcher(
-  city: string
-): DataFetcherOutput {
-  const [data, setData] = useState<OpenMeteoResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+export default async function DataFetcher<T>(
+  url: string,
+  ttlMinutes: number = 5
+): Promise<T> {
+  const key = `cache_${url}`;
+  const now = Date.now();
 
-  useEffect(() => {
-    if (!city) {
-      setData(null);
-      setError(null);
-      setLoading(false);
-      return;
+  // 1) Intento leer del cache
+  const raw = localStorage.getItem(key);
+  if (raw) {
+    try {
+      const entry: CacheEntry<T> = JSON.parse(raw);
+      const ageMinutes = (now - entry.timestamp) / 1000 / 60;
+      if (ageMinutes < ttlMinutes) {
+        // Cache vigente → lo devolvemos
+        return entry.data;
+      }
+      // Cache expirado → seguimos al fetch pero guardamos stale
+    } catch {
+      localStorage.removeItem(key);
+    }
+  }
+
+  // 2) Petición a la API
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = (await res.json()) as T;
+
+    // 3) Guardamos en cache
+    const newEntry: CacheEntry<T> = { timestamp: now, data: json };
+    try {
+      localStorage.setItem(key, JSON.stringify(newEntry));
+    } catch {
+      /* si storage falla, lo ignoramos */
     }
 
-    const url = `TU_URL_OPEN_METEO?city=${city}`; // ← pon aquí tu URL real
-
-    setLoading(true);
-    fetch(url)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<OpenMeteoResponse>;
-      })
-      .then((json) => {
-        setData(json);
-        setError(null);
-      })
-      .catch((err: any) => {
-        setError(err.message || 'Error desconocido');
-        setData(null);
-      })
-      .finally(() => setLoading(false));
-  }, [city]);
-
-  return { data, loading, error };
+    return json;
+  } catch (err) {
+    // 4) Si falla el fetch, devolvemos stale si existe
+    if (raw) {
+      try {
+        const entry: CacheEntry<T> = JSON.parse(raw);
+        return entry.data;
+      } catch {
+        // parsing fallido → seguimos al error
+      }
+    }
+    // No hay cache → lanzamos error
+    throw err;
+  }
 }
