@@ -4,11 +4,11 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Info, CheckCircle, Clock, MapPin } from 'lucide-react';
 import { useLocation } from '../contexts/LocationContext';
-import useDataFetcher from '../functions/useDataFetcher';
+import { useWeatherData } from '../hooks/useWeatherData';
 
 const AlertsSection = () => {
   const { selectedLocation } = useLocation();
-  const { data } = useDataFetcher(selectedLocation.latitude, selectedLocation.longitude);
+  const { data } = useWeatherData(selectedLocation.latitude, selectedLocation.longitude);
 
   // Generar alertas dinámicas basadas en datos reales
   const generateAlerts = () => {

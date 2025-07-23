@@ -154,33 +154,12 @@ export const useWeatherData = (
     loadWeatherData(true);
   }, [loadWeatherData]);
 
-  // Configurar auto-refresh
-  useEffect(() => {
-    if (autoRefreshTimeoutRef.current) {
-      clearTimeout(autoRefreshTimeoutRef.current);
-    }
-
-    if (options.autoRefreshMinutes && options.autoRefreshMinutes > 0) {
-      const interval = options.autoRefreshMinutes * 60 * 1000;
-      autoRefreshTimeoutRef.current = setTimeout(() => {
-        console.log('Auto-refreshing weather data');
-        loadWeatherData(true);
-      }, interval);
-    }
-
-    return () => {
-      if (autoRefreshTimeoutRef.current) {
-        clearTimeout(autoRefreshTimeoutRef.current);
-      }
-    };
-  }, [loadWeatherData, options.autoRefreshMinutes, data]);
-
-  // Cargar datos cuando cambien las coordenadas
+  // Cargar datos cuando cambien las coordenadas (solo una vez por ubicación)
   useEffect(() => {
     if (latitude && longitude) {
       loadWeatherData();
     }
-  }, [latitude, longitude, loadWeatherData]);
+  }, [latitude, longitude]); // Removido loadWeatherData de las dependencias para evitar loops
 
   // Limpiar timeouts al desmontar
   useEffect(() => {

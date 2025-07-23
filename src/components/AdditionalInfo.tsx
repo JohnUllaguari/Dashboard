@@ -15,11 +15,11 @@ import {
   Sun
 } from 'lucide-react';
 import { useLocation } from '../contexts/LocationContext';
-import useDataFetcher from '../functions/useDataFetcher';
+import { useWeatherData } from '../hooks/useWeatherData';
 
 const AdditionalInfo = () => {
   const { selectedLocation } = useLocation();
-  const { data } = useDataFetcher(selectedLocation.latitude, selectedLocation.longitude);
+  const { data } = useWeatherData(selectedLocation.latitude, selectedLocation.longitude);
 
   // Generar consejos dinámicos basados en datos reales
   const generateTips = () => {
