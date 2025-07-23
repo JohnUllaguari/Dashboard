@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Download, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 
 const PWAStatus = () => {
-  const { isInstallable, installPWA, isOnline, updateAvailable, updatePWA } = usePWA();
+  const { installPWA, isOnline, updateAvailable, updatePWA } = usePWA();
 
   return (
     <div className="fixed bottom-4 right-4 z-50 space-y-2">
@@ -25,22 +25,20 @@ const PWAStatus = () => {
         </div>
       </Card>
 
-      {/* Botón de instalación */}
-      {isInstallable && (
-        <Card className="p-3 bg-blue-50 border-blue-200">
-          <div className="flex items-center gap-2">
-            <Download className="w-4 h-4 text-blue-600" />
-            <Button
-              onClick={installPWA}
-              size="sm"
-              className="h-8 text-xs"
-              variant="default"
-            >
-              Instalar App
-            </Button>
-          </div>
-        </Card>
-      )}
+      {/* Botón de instalación - SIEMPRE VISIBLE */}
+      <Card className="p-3 bg-blue-50 border-blue-200">
+        <div className="flex items-center gap-2">
+          <Download className="w-4 h-4 text-blue-600" />
+          <Button
+            onClick={installPWA}
+            size="sm"
+            className="h-8 text-xs"
+            variant="default"
+          >
+            Instalar App
+          </Button>
+        </div>
+      </Card>
 
       {/* Actualización disponible */}
       {updateAvailable && (

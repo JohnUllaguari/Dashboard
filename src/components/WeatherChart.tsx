@@ -10,7 +10,7 @@ import { useLocation } from '../contexts/LocationContext';
 const WeatherChart = () => {
   const [viewMode, setViewMode] = useState('line');
   const { selectedLocation } = useLocation();
-  const { data, loading, error, isFromCache, cacheAge, refresh } = useWeatherData(
+  const { data, loading, error, refresh } = useWeatherData(
     selectedLocation.latitude, 
     selectedLocation.longitude
   );
@@ -75,21 +75,16 @@ const WeatherChart = () => {
             </h2>
             <div className="flex items-center gap-4 text-sm">
               <p className="text-gray-600">Próximas 24 horas</p>
-              {isFromCache && (
-                <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
-                  Cache ({cacheAge}s)
-                </span>
-              )}
               {error && (
-                <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">
-                  Offline
+                <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">
+                  {error}
                 </span>
               )}
               <button 
                 onClick={refresh}
                 className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs hover:bg-blue-200 transition-colors"
               >
-                Actualizar
+                ↻ Actualizar
               </button>
             </div>
           </div>

@@ -6,7 +6,7 @@ import { Thermometer, Droplets, Wind, Eye } from 'lucide-react';
 
 const WeatherIndicators = () => {
   const { selectedLocation } = useLocation();
-  const { data, loading, error, isFromCache, cacheAge, refresh } = useWeatherData(
+  const { data, loading, error, refresh } = useWeatherData(
     selectedLocation.latitude, 
     selectedLocation.longitude
   );
@@ -58,21 +58,16 @@ const WeatherIndicators = () => {
           Condiciones actuales en {selectedLocation.label}
         </h3>
         <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
-          {isFromCache && (
-            <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-              Cache ({cacheAge}s)
-            </span>
-          )}
           {error && (
-            <span className="bg-red-100 text-red-800 px-2 py-1 rounded">
-              Datos offline
+            <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded">
+              {error}
             </span>
           )}
           <button 
             onClick={refresh}
             className="bg-blue-100 text-blue-800 px-2 py-1 rounded hover:bg-blue-200 transition-colors"
           >
-            Actualizar
+            ↻ Actualizar
           </button>
         </div>
       </div>

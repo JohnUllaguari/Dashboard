@@ -11,7 +11,6 @@ export interface PWAInstallPrompt extends Event {
 }
 
 export const usePWA = () => {
-  const [isInstallable, setIsInstallable] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<PWAInstallPrompt | null>(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -38,7 +37,6 @@ export const usePWA = () => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setInstallPrompt(e as PWAInstallPrompt);
-      setIsInstallable(true);
     };
 
     // Detectar cambios en la conexión
@@ -57,18 +55,25 @@ export const usePWA = () => {
   }, []);
 
   const installPWA = async () => {
-    if (!installPrompt) return;
+    if (!installPrompt) {
+      // Si no hay soporte, mostrar instrucciones
+      alert('Para instalar la app:\n\n' +
+            'Chrome/Edge: Menú (⋮) → "Instalar App"\n' +
+            'Firefox: Menú (☰) → "Instalar como App"\n' +
+            'Safari: Compartir → "Agregar a pantalla de inicio"');
+      return;
+    }
 
     try {
       await installPrompt.prompt();
       const result = await installPrompt.userChoice;
       
       if (result.outcome === 'accepted') {
-        setIsInstallable(false);
         setInstallPrompt(null);
       }
     } catch (error) {
       console.error('Error installing PWA:', error);
+      alert('No se pudo instalar automáticamente. Use el menú del navegador.');
     }
   };
 
@@ -79,7 +84,6 @@ export const usePWA = () => {
   };
 
   return {
-    isInstallable,
     installPWA,
     isOnline,
     updateAvailable,

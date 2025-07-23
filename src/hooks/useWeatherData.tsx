@@ -6,9 +6,6 @@ export interface WeatherDataOutput {
   data: OpenMeteoResponse | null;
   loading: boolean;
   error: string | null;
-  isFromCache: boolean;
-  lastUpdated: Date | null;
-  cacheAge: number | null;
   refresh: () => void;
 }
 
@@ -34,9 +31,6 @@ export const useWeatherData = (
   const [data, setData] = useState<OpenMeteoResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [isFromCache, setIsFromCache] = useState<boolean>(false);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [cacheAge, setCacheAge] = useState<number | null>(null);
 
   const cache = useWeatherCache();
   const retryTimeoutRef = useRef<NodeJS.Timeout>();
@@ -114,77 +108,46 @@ export const useWeatherData = (
 
   // Función principal para obtener datos
   const loadWeatherData = useCallback(async (forceRefresh: boolean = false) => {
-    // Limpiar timeouts anteriores
     if (retryTimeoutRef.current) {
       clearTimeout(retryTimeoutRef.current);
     }
 
     setError(null);
 
-    // Verificar cache primero si no es refresh forzado
-    if (!forceRefresh) {
+    // Verificar cache primero (solo para uso offline)
+    if (!forceRefresh && !navigator.onLine) {
       const cachedData = cache.getCachedData(locationKey);
       if (cachedData) {
         setData(cachedData);
-        setIsFromCache(true);
         setLoading(false);
-        
-        // Calcular edad del cache
-        const cacheStats = cache.getCacheStats();
-        if (cacheStats.newestEntry) {
-          const age = Math.round((Date.now() - cacheStats.newestEntry) / 1000);
-          setCacheAge(age);
-          setLastUpdated(new Date(cacheStats.newestEntry));
-        }
-        
-        console.log('Using cached data');
+        console.log('Using cached data (offline)');
         return;
       }
     }
 
-    // Si no hay cache o es refresh forzado, fetch de la API
+    // Fetch desde la API (online)
     setLoading(true);
-    setIsFromCache(false);
 
     try {
       const freshData = await fetchWeatherData();
-      
-      // Guardar en cache
       cache.setCachedData(locationKey, freshData);
-      
-      // Actualizar estado
       setData(freshData);
-      setLastUpdated(new Date());
-      setCacheAge(0);
       setError(null);
       
     } catch (fetchError: any) {
-      console.error('Failed to fetch weather data:', fetchError.message);
-      
-      // En modo offline, intentar usar datos de cache aunque sean antiguos
-      if (options.enableOfflineMode) {
-        const allCachedData = cache.getAllCachedData();
-        const locationData = allCachedData.find(item => item.location === locationKey);
-        
-        if (locationData) {
-          console.log('Using stale cache data due to network error');
-          setData(locationData.data);
-          setIsFromCache(true);
-          setCacheAge(Math.round((Date.now() - locationData.timestamp) / 1000));
-          setLastUpdated(new Date(locationData.timestamp));
-          setError(`Datos offline (${Math.round((Date.now() - locationData.timestamp) / 60000)} min antiguos)`);
-        } else {
-          setError(`Sin conexión y sin datos locales: ${fetchError.message}`);
-          setData(null);
-        }
+      // Si falla, usar cache como fallback
+      const cachedData = cache.getCachedData(locationKey);
+      if (cachedData) {
+        setData(cachedData);
+        setError('Usando datos guardados (sin conexión)');
       } else {
-        setError(fetchError.message);
+        setError('Sin conexión y sin datos guardados');
         setData(null);
       }
     } finally {
       setLoading(false);
     }
-  }, [locationKey, cache, fetchWeatherData, options.enableOfflineMode]);
+  }, [locationKey, cache, fetchWeatherData]);
 
   // Función para refrescar manualmente
   const refresh = useCallback(() => {
@@ -235,9 +198,6 @@ export const useWeatherData = (
     data,
     loading,
     error,
-    isFromCache,
-    lastUpdated,
-    cacheAge,
     refresh
   };
 };
