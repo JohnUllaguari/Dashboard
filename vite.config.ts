@@ -7,6 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: mode === 'production' ? '/climate-sense-dashboard-hub/' : '/',
   server: {
     host: "::",
     port: 8080,
@@ -24,8 +25,8 @@ export default defineConfig(({ mode }) => ({
         theme_color: '#0ea5e9',
         background_color: '#ffffff',
         display: 'standalone',
-        scope: '/',
-        start_url: '/',
+        scope: mode === 'production' ? '/climate-sense-dashboard-hub/' : '/',
+        start_url: mode === 'production' ? '/climate-sense-dashboard-hub/' : '/',
         icons: [
           {
             src: 'pwa-192x192.png',
